@@ -1,5 +1,3 @@
 pandas
 numpy
 v20
-python-decouple
-pyyaml
