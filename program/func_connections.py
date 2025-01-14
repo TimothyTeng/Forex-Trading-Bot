@@ -16,7 +16,7 @@ def connect_v20():
   client.account.get(accountID=ACCOUNT_ID)
   response = client.account.get(accountID=ACCOUNT_ID)
   account = json.loads(response.body["account"].json())
-  
+
   # Success message
   print("Connection Successful")
   print(f"Account ID: {account["id"]}")

@@ -4,6 +4,12 @@ import time
 import json
 from func_utils import format_number
 
+# check order status
+def check_order_status(client, order_id):
+  order = json.loads(client.order.get(accountID=ACCOUNT_ID, ids=[order_id]).body.json())
+  if order["order"]:
+    return order.data["order"]["state"]
+
 # Place market order
 def place_market_order(client, market, side, size, price, reduce_only):
   amt = ("-" + size) if side == "SELL" else size[1:]

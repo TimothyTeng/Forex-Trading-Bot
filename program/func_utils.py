@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Format number
 def format_number(curr_num, match_decimals):
@@ -16,16 +16,16 @@ def format_number(curr_num, match_decimals):
     return f"{int(curr_num)}"
   
 def format_time(timestamp):
-  return timestamp.replace(microsecond=0).isoformat()
+    return timestamp.astimezone(timezone.utc).replace(microsecond=0).isoformat()
 
 def get_ISO_times():
-  #Get time stamps
-  date_start = datetime.now()
-  date_end = date_start - timedelta(days=16)
-  times_dict = {
-    "range_1": {
-      "from_iso": format_time(date_start),
-      "to_iso": format_time(date_end)
+    # Get time stamps
+    date_start = datetime.now(timezone.utc)  # Ensure datetime is timezone-aware
+    date_end = date_start - timedelta(hours=500)
+    times_dict = {
+        "range_1": {
+            "from_iso": format_time(date_start),
+            "to_iso": format_time(date_end)
+        }
     }
-  }
-  return times_dict
+    return times_dict
