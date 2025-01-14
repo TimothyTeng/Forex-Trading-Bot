@@ -4,11 +4,29 @@ import time
 import json
 from func_utils import format_number
 
+
+# Get existing open positions
+def is_open_positions(client, market):
+  # Protect API
+  time.sleep(0.2)
+
+  # Get positions
+  client.position.get(accountID=ACCOUNT_ID, instrument="USD_CAD").body
+  all_positions = client.position.get(accountID=ACCOUNT_ID, instrument=market).body
+
+  # Determine if open
+  if "errorCode" in all_positions and all_positions["errorCode"] == "NO_SUCH_POSITION":
+    return False
+  else:
+    return True
+
 # check order status
 def check_order_status(client, order_id):
   order = json.loads(client.order.get(accountID=ACCOUNT_ID, ids=[order_id]).body.json())
-  if order["order"]:
+  if "order" in order:
     return order.data["order"]["state"]
+  else:
+    return "FILLED"
 
 # Place market order
 def place_market_order(client, market, side, size, price, reduce_only):

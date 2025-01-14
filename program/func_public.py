@@ -9,6 +9,30 @@ import json
 ISO_TIMES = get_ISO_times()
 
 
+# Get candles recent
+def get_candles_recent(client, market):
+
+  # Define output
+  close_prices = []
+
+  # Protect API
+  time.sleep(0.2)
+
+  # Get data
+  candles = client.instrument.candles(
+      instrument=market,
+      granularity=RESOLUTION
+    )
+  
+  # Structure data
+  for candle in candles.body["candles"]:
+    c = json.loads(candle.json())
+    close_prices.append(c["mid"]["c"])
+  
+  # Construct and return close price series
+  prices_result = np.array(close_prices).astype(float)
+  return prices_result
+
 # Get candles historical
 def get_candles_historical(client, market):
   close_prices = []
