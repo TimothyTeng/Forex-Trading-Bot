@@ -1,6 +1,6 @@
-pandas
-numpy
-v20
-python-decouple
-pyyaml
-statsmodels
+pandas==2.2.3
+numpy==2.2.1
+v20==3.0.25.0
+python-decouple==3.6
+pyyaml==6.0.2
+statsmodels==0.14.4
