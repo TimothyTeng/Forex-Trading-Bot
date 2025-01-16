@@ -72,6 +72,7 @@ class BotAgent:
 
     # check order status
     order_status = check_order_status(self.client, order_id)
+    print(order_status)
 
     # Guard: If order cancelled move onto next Pair
     if order_status == "CANCELLED":
@@ -119,10 +120,12 @@ class BotAgent:
       )
 
       # Store the order id
+      
       self.order_dict["order_id_m1"] = json.loads(base_order.body['orderFillTransaction'].json())["orderID"]
       self.order_dict["order_time_m1"] = datetime.now().isoformat()
     
     except Exception as e:
+      print(e)
       self.order_dict["pair_status"] = "ERROR"
       self.order_dict["comments"] = f"Market 1 {self.market_1}: , {e}"
       return self.order_dict
@@ -132,6 +135,7 @@ class BotAgent:
 
     # Guard: Abort if order failed
     if order_status_m1 != "live":
+      print("order status_m1:", order_status_m1)
       self.order_dict["pair_status"] = "ERROR"
       self.order_dict["comments"] = f"{self.market_1} failed to fill"
       return self.order_dict
@@ -147,7 +151,7 @@ class BotAgent:
         self.client,
         market = self.market_2,
         side = self.quote_side,
-        size = self.quote_size,
+        size = str(self.quote_size),
         price = self.quote_price,
         reduce_only="DEFAULT"
       )
@@ -157,6 +161,7 @@ class BotAgent:
       self.order_dict["order_time_m2"] = datetime.now().isoformat()
     
     except Exception as e:
+      print(e)
       self.order_dict["pair_status"] = "ERROR"
       self.order_dict["comments"] = f"Market 2 {self.market_2}: , {e}"
       return self.order_dict
@@ -182,10 +187,10 @@ class BotAgent:
 
         # Ensure order is live before proceeding
         time.sleep(2)
-        close_order_id = json.loads(close_order.body["orderCancelTransaction"].json())["orderID"]
+        close_order_id = json.loads(close_order.body["orderFillTransaction"].json())["orderID"]
         order_status_close_order = check_order_status(self.client, close_order_id)
         if order_status_close_order != "FILLED":
-          print("ABORT PROGRAM")
+          print("ABORT PROGRAM = 1")
           print("Unexpected Error")
           print(order_status_close_order)
 
@@ -195,6 +200,7 @@ class BotAgent:
           exit(1)
       
       except Exception as e:
+        print(e)
         self.order_dict["pair_status"] = "ERROR"
         self.order_dict["comments"] = f"Market 2 {self.market_2}: , {e}"
         print("ABORT PROGRAM")

@@ -12,10 +12,13 @@ MAIN_STREAM_HOST = "stream-fxtrade.oanda.com"
 MODE = "DEVELOPMENT"
 
 #Close all open postions and orders
-ABORT_ALL_POSITIONS = False
+ABORT_ALL_POSITIONS = True
 
 #Find Cointegrated Pairs
-FIND_COINTEGRATED = False
+FIND_COINTEGRATED = True
+
+#Manage all exits
+MANAGE_EXITS = True
 
 #Place trades
 PLACE_TRADES = True
@@ -29,9 +32,9 @@ WINDOW = 21
 # Thresholds - Opening
 MAX_HALF_LIFE = 24
 ZSCORE_THRESH = 1.5
-USD_PER_TRADE = 50
+USD_PER_TRADE = 100
 # Amount inside your account - To ensure bots do not go above amount in account
-USD_MIN_COLLATERAL = 1000
+USD_MIN_COLLATERAL = 2000
 
 # Thresholds - Closing
 CLOSE_AT_ZSCORE_CROSS = True

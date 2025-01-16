@@ -23,7 +23,15 @@ def open_positions(client):
   #markets = client.account.instruments(accountID=ACCOUNT_ID).body['instruments']
 
   # Initialize container for BotAgent results
+  # Opening JSON file
   bot_agents = []
+  try:
+    open_position_file = open("./bot_agents.json")
+    open_position_dict = json.load(open_position_file)
+    for p in open_position_dict:
+      bot_agents.append(p)
+  except:
+    bot_agents = []
 
   # Find ZScore triggers
   for index, row in df.iterrows():
@@ -58,7 +66,7 @@ def open_positions(client):
           base_price = series_1[-1]
           quote_price = series_2[-1]
           accept_base_price = float(base_price) * 1.01 if z_score < 0 else float(base_price) * 0.99
-          accept_quote_price = float(quote_price) * 1.01 if z_score < 0 else float(quote_price) * 0.99
+          accept_quote_price = float(quote_price) * 1.01 if z_score > 0 else float(quote_price) * 0.99
           failsafe_base_price = float(base_price) * 0.05 if z_score > 0 else float(base_price) * 1.7
           base_mar = json.loads(client.account.instruments(accountID=ACCOUNT_ID, instruments=base_market).body['instruments'][0].json())
           quote_mar = json.loads(client.account.instruments(accountID=ACCOUNT_ID, instruments=quote_market).body['instruments'][0].json())
@@ -73,7 +81,7 @@ def open_positions(client):
 
           # Get size
           base_quantity = 1 / base_price * USD_PER_TRADE
-          quote_quantity = 1 / base_price * USD_PER_TRADE
+          quote_quantity = 1 / quote_price * USD_PER_TRADE
           base_step_size = base_mar["tradeUnitsPrecision"]
           quote_step_size = quote_mar["tradeUnitsPrecision"]
           # Format sizes
@@ -97,6 +105,37 @@ def open_positions(client):
                 break
 
               #Create Bot Agent
-              print(base_market, base_side, base_size, accept_base_price)
-              print(quote_market, quote_side, quote_size, accept_quote_price)
-              exit(1)
+              bot_agent = BotAgent(
+                client,
+                market_1=base_market,
+                market_2=quote_market,
+                base_side=base_side,
+                base_size=base_size,
+                base_price=accept_base_price,
+                quote_side=quote_side,
+                quote_size=quote_size,
+                quote_price=accept_quote_price,
+                accept_failsafe_base_price=accept_failsafe_base_price,
+                z_score=z_score,
+                half_life=half_life,
+                hedge_ratio=hedge_ratio
+              )
+
+              # Open Trades
+              bot_open_dict = bot_agent.open_trades()
+
+              # Handle success in opening trades
+              if bot_open_dict["pair_status"] == "LIVE":
+                # Append to list of bot agents
+                bot_agents.append(bot_open_dict)
+                del(bot_open_dict)
+              
+                # Confirm bot status
+                print("Trade status: Live")
+                print("---")
+  # Save agents
+  print(f"Success: {len(bot_agents)} trades are LIVE!")
+  if len(bot_agents) > 0:
+    with open("bot_agents.json", "w") as f:
+      json.dump(bot_agents, f)
+

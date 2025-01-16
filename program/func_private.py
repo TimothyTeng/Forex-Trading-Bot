@@ -11,27 +11,29 @@ def is_open_positions(client, market):
   time.sleep(0.2)
 
   # Get positions
-  client.position.get(accountID=ACCOUNT_ID, instrument="USD_CAD").body
   all_positions = client.position.get(accountID=ACCOUNT_ID, instrument=market).body
+
+  print(f"Checking {market} Price")
 
   # Determine if open
   if "errorCode" in all_positions and all_positions["errorCode"] == "NO_SUCH_POSITION":
+    return False
+  elif json.loads(all_positions["position"].json())["long"]["units"] == "0.0" and json.loads(all_positions["position"].json())["short"]["units"] == "0.0":
     return False
   else:
     return True
 
 # check order status
 def check_order_status(client, order_id):
-  order = json.loads(client.order.get(accountID=ACCOUNT_ID, ids=[order_id]).body.json())
+  order = client.order.get(accountID=ACCOUNT_ID, orderSpecifier=order_id).body
   if "order" in order:
-    return order.data["order"]["state"]
-  else:
-    return "FILLED"
+    return json.loads(order["order"].json())["state"]
+  #else:
+  return "FILLED"
 
 # Place market order
 def place_market_order(client, market, side, size, price, reduce_only):
-  amt = ("-" + size) if side == "SELL" else size[1:]
-  print(amt, market, side, size, price, reduce_only)
+  amt = -float(size) if side == "SELL" else float(size)
   response = client.order.create(
     accountID=ACCOUNT_ID,
     order = {
