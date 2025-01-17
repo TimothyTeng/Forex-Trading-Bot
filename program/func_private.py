@@ -89,7 +89,7 @@ def abort_all_positions(client):
       accept_price = format_number(accept_price, tickSize)
 
       # Place order to close
-      order = place_market_order(client, market, side, size, accept_price, "REDUCE_ONLY")
+      order = place_market_order(client, market, side, str(abs(float(size))), accept_price, "REDUCE_ONLY")
 
       # Append result to close orders
       close_orders.append(order)

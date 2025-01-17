@@ -10,14 +10,14 @@ from func_messaging import send_message
 # MAIN FUNCTION
 if __name__ == "__main__":
 
-  success = send_message("Another cooooooooooooool message")
-  print(success)
-  exit(1)
+  # Message on start
+  send_message("Bot launch successful!")
 
   try:
     client = connect_v20()
   except Exception as e:
     print("Error connecting to client:", e)
+    send_message(f"Failed to connect to client {e}")
     exit(1)
 
   if ABORT_ALL_POSITIONS:
@@ -26,6 +26,7 @@ if __name__ == "__main__":
       close_orders = abort_all_positions(client)
     except Exception as e:
       print("Error aborting all positions:", e)
+      send_message(f"Error closing all positions {e}")
       exit(1)
 
   #Find Cointegrated pairs
@@ -37,6 +38,7 @@ if __name__ == "__main__":
 
     except Exception as e:
       print("Error constructing market prices:", e)
+      send_message(f"Error constructing market prices {e}")
       exit(1)
 
     # Store cointegrated pairs
@@ -48,6 +50,7 @@ if __name__ == "__main__":
         exit(1)
     except Exception as e:
       print("Error saving cointegrated pairs:", e)
+      send_message(f"Error saving cointegrated pairs {e}")
       exit(1)
 
 
@@ -61,6 +64,7 @@ if __name__ == "__main__":
         manage_trade_exits(client)
       except Exception as e:
         print("Error managing exiting positions", e)
+        send_message(f"Error managing exiting positions {e}")
         exit(1)
 
 
@@ -71,5 +75,6 @@ if __name__ == "__main__":
         open_positions(client)
       except Exception as e:
         print("Error finding trading opportunities", e)
+        send_message(f"Error open trades {e}")
         exit(1)
     
