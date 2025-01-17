@@ -3,6 +3,7 @@ from func_utils import format_number
 from func_public import get_candles_recent
 from func_cointegration import calculate_zscore
 from func_private import place_market_order
+from func_messaging import send_message
 import json
 import time
 
@@ -97,7 +98,6 @@ def manage_trade_exits(client):
 
     # Trigger close based on Z-Score
     if CLOSE_AT_ZSCORE_CROSS:
-      print(series_1[-1], series_2[-1])
       # Initialize z-scores
       hedge_ratio = position["hedge_ratio"]
       z_score_traded = position["z-score"]
@@ -108,7 +108,7 @@ def manage_trade_exits(client):
       # Determine trigger
       z_score_level_check = abs(z_score_current) >= abs(z_score_traded)
       z_score_cross_check = (z_score_current < 0 and z_score_traded > 0) or (z_score_current > 0 and z_score_traded < 0)
-
+      print(z_score_current, z_score_traded, abs(z_score_current) >= abs(z_score_traded), (z_score_current < 0 and z_score_traded > 0) or (z_score_current > 0 and z_score_traded < 0))
       # Close trade
       if z_score_level_check and z_score_cross_check:
 
@@ -175,6 +175,7 @@ def manage_trade_exits(client):
         )
 
         print(json.loads(close_order_m2.body["orderFillTransaction"].json())["orderID"])
+        send_message(f"Closed {position_market_m1}, {position_market_m2}")
         print(">>> Closing <<<")
       except Exception as e:
         print(f"Exit failed for {position_market_m1} with {position_market_m2}")

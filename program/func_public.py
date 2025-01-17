@@ -16,7 +16,7 @@ def get_candles_recent(client, market):
   close_prices = []
 
   # Protect API
-  time.sleep(0.2)
+  time.sleep(0.4)
 
   # Get data
   candles = client.instrument.candles(

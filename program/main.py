@@ -6,6 +6,7 @@ from func_cointegration import store_cointegration_results
 from func_entry_pairs import open_positions
 from func_exit_pairs import manage_trade_exits
 from func_messaging import send_message
+import time
 
 # MAIN FUNCTION
 if __name__ == "__main__":
@@ -59,13 +60,14 @@ if __name__ == "__main__":
 
     # Place trades for opening positions
     if MANAGE_EXITS:
-      try:
+      #try:
         print("Managing exits...")
         manage_trade_exits(client)
-      except Exception as e:
-        print("Error managing exiting positions", e)
-        send_message(f"Error managing exiting positions {e}")
-        exit(1)
+        time.sleep(2)
+      #except Exception as e:
+      #  print("Error managing exiting positions", e)
+        #send_message(f"Error managing exiting positions")
+      #  exit(1)
 
 
     # Place trades for opening positions
@@ -73,8 +75,9 @@ if __name__ == "__main__":
       try:
         print("Finding trading opportunities...")
         open_positions(client)
+        time.sleep(2)
       except Exception as e:
         print("Error finding trading opportunities", e)
-        send_message(f"Error open trades {e}")
+        send_message(f"Error open trades")
         exit(1)
     

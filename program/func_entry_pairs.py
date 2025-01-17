@@ -102,6 +102,7 @@ def open_positions(client):
 
               # Guard: Ensure collateral
               if free_collateral < USD_MIN_COLLATERAL:
+                print("Free collateral reached")
                 break
 
               #Create Bot Agent

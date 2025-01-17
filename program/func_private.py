@@ -13,8 +13,6 @@ def is_open_positions(client, market):
   # Get positions
   all_positions = client.position.get(accountID=ACCOUNT_ID, instrument=market).body
 
-  print(f"Checking {market} Price")
-
   # Determine if open
   if "errorCode" in all_positions and all_positions["errorCode"] == "NO_SUCH_POSITION":
     return False
