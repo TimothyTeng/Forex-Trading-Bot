@@ -12,16 +12,16 @@ MAIN_STREAM_HOST = "stream-fxtrade.oanda.com"
 MODE = "DEVELOPMENT"
 
 #Close all open postions and orders
-ABORT_ALL_POSITIONS = False
+ABORT_ALL_POSITIONS = True
 
 #Find Cointegrated Pairs
-FIND_COINTEGRATED = False
+FIND_COINTEGRATED = True
 
 #Manage all exits
 MANAGE_EXITS = True
 
 #Place trades
-PLACE_TRADES = False
+PLACE_TRADES = True
 
 # Resolution
 RESOLUTION = "H1"
