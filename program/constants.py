@@ -1,4 +1,5 @@
 from decouple import config
+from threading import Event
 
 #Connect to the test network for OANDA
 TEST_HOST = "api-fxpractice.oanda.com"
@@ -12,16 +13,20 @@ MAIN_STREAM_HOST = "stream-fxtrade.oanda.com"
 MODE = "DEVELOPMENT"
 
 #Close all open postions and orders
-ABORT_ALL_POSITIONS = True
+ABORT_ALL_POSITIONS_EVENT = Event()
+#ABORT_ALL_POSITIONS_EVENT.set()
 
 #Find Cointegrated Pairs
-FIND_COINTEGRATED = True
+FIND_COINTEGRATED_EVENT = Event()
+#FIND_COINTEGRATED_EVENT.set()
 
 #Manage all exits
-MANAGE_EXITS = True
+MANAGE_EXITS_EVENT = Event()
+MANAGE_EXITS_EVENT.set()
 
 #Place trades
-PLACE_TRADES = True
+PLACE_TRADES_EVENT = Event()
+#PLACE_TRADES_EVENT.set()
 
 # Resolution
 RESOLUTION = "H1"

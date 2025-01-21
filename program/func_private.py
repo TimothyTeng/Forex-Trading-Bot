@@ -4,6 +4,11 @@ import time
 import json
 from func_utils import format_number
 
+def get_balance(client):
+  response = client.account.get(accountID=ACCOUNT_ID)
+  account = json.loads(response.body["account"].json())
+
+  return account["balance"], account["unrealizedPL"], account["marginUsed"]
 
 # Get existing open positions
 def is_open_positions(client, market):
@@ -94,6 +99,10 @@ def abort_all_positions(client):
 
       # Protect API
       time.sleep(0.1)
+
+    # Clear history of bot_agents
+    with open("bot_agents.json", "w") as f:
+      json.dump([], f)
   
   # Return closed orders
   return close_orders
