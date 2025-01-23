@@ -35,7 +35,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
   await update.message.reply_text("Hello! This is your Forex Bot :)")
 
 @is_authorized_user
-async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
   await update.message.reply_text(
     """
     This is the command system to trade in the OANDA System
@@ -50,10 +50,6 @@ async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
   )
 
 @is_authorized_user
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-  await update.message.reply_text("Hello! Type /trade to start!")
-
-@is_authorized_user
 async def trade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
   BOT_ACTIVE_EVENT.set()  # Signal trading to start
   await update.message.reply_text("Beginning trade!")
@@ -65,6 +61,7 @@ async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 @is_authorized_user
 async def abort_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+  ABORT_ALL_POSITIONS_EVENT.set()
   await update.message.reply_text("Abort program! Selling stock and stopping trade.")
 
 @is_authorized_user
@@ -73,10 +70,11 @@ async def balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
   balance, unrealizedPL, margin = get_balance(client)
   await update.message.reply_text(
     f"""
-    - Account balance: {balance}
-  - current unrealized Profit/Loss: {unrealizedPL}
-  - current margin used: {margin}
-  - current win percentage: {round(float(unrealizedPL)/float(margin), 2)}
+    - Account NAV: {float(balance) + float(unrealizedPL)}
+- Account balance: {balance}
+- current unrealized Profit/Loss: {unrealizedPL}
+- current margin used: {margin}
+- current win percentage: {round(float(unrealizedPL)/float(margin), 3)}
     """
     )
 
@@ -84,7 +82,7 @@ async def balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def config_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
   await update.message.reply_text(
   f"""
-  Type the following messages to configer the chatbot
+  Type the following messages to configure the chatbot
   ----  
   enable/disable trade ~ Enable or disable the bot from finding new trading opportunities
   
@@ -139,7 +137,6 @@ def start_telegram_bot():
 
   # Commands
   app.add_handler(CommandHandler('start', start_command))
-  app.add_handler(CommandHandler('about', about_command))
   app.add_handler(CommandHandler('help', help_command))
   app.add_handler(CommandHandler('trade', trade_command))
   app.add_handler(CommandHandler('stop', stop_command))

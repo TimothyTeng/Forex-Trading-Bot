@@ -16,13 +16,6 @@ def manage_trade_exits(client):
     Manage exiting open positions
     Based upon criteria set in constants
   """
-
-  historical_z_score_data = {}
-  try:
-    open_z_score_file = open("./z_score_data.json")
-    historical_z_score_data = json.load(open_z_score_file)
-  except:
-    print("new z_score data collection")
   # Initialize saving output
   save_output = []
 
@@ -113,13 +106,6 @@ def manage_trade_exits(client):
         spread = series_1 - (hedge_ratio * series_2)
         z_score_current = calculate_zscore(spread).values.tolist()[-1]
 
-      # Determine trigger
-      position_string = position_market_m1 + " & " + position_market_m2
-      if position_string in historical_z_score_data.keys():
-        historical_z_score_data[position_string].append(z_score_current)
-      else:
-        historical_z_score_data[position_string] = [z_score_current]
-
 
       z_score_level_check = abs(z_score_current) >= abs(z_score_traded)
       z_score_cross_check = (z_score_current < 0 and z_score_traded > 0) or (z_score_current > 0 and z_score_traded < 0)
@@ -203,10 +189,6 @@ def manage_trade_exits(client):
   print(f"{len(save_output)} Items remaining. Saving file...")
   with open("bot_agents.json", "w") as f:
     json.dump(save_output, f)
-
-  with open("z_score_data.json", "w") as f:
-    json.dump(historical_z_score_data, f)
-
 
 
 
