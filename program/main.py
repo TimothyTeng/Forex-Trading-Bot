@@ -70,7 +70,7 @@ def run_trading_logic():
           time.sleep(2)
         except Exception as e:
           print("Error managing exiting positions", e)
-          send_message(f"Error managing exiting positions")
+          send_message(f"Error managing exiting positions: {e}")
           #exit(1)
 
       # Place trades for opening positions
@@ -81,7 +81,7 @@ def run_trading_logic():
           time.sleep(2)
         except Exception as e:
           print("Error finding trading opportunities", e)
-          send_message(f"Error open trades")
+          send_message(f"Error open trades: {e}")
           #exit(1)
 
       #Find Cointegrated pairs
