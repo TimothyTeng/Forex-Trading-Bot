@@ -3,7 +3,6 @@ from constants import ACCOUNT_ID
 import time
 import json
 from func_utils import format_number
-from func_messaging import send_message
 
 def get_balance(client):
   response = client.account.get(accountID=ACCOUNT_ID)
@@ -94,7 +93,6 @@ def abort_all_positions(client):
 
       # Place order to close
       order = place_market_order(client, market, side, str(abs(float(size))), accept_price, "REDUCE_ONLY")
-      send_message(f"Closing {market}")
       # Append result to close orders
       close_orders.append(order)
 
