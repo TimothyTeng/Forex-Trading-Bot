@@ -61,29 +61,33 @@ def manage_trade_exits(client):
     time.sleep(0.5)
 
     # Get order info m1 per exchange
-    order_m1 = json.loads(client.order.get(accountID=ACCOUNT_ID, orderSpecifier=position["order_id_m1"]).body["order"].json())
-    order_market_m1 = order_m1["instrument"]
-    order_size_m1 = order_m1["units"]
-    order_side_m1 = "SELL" if float(order_size_m1) < 0 else "BUY"
-    order_size_m1 = str(int(abs(float(order_size_m1))))
-    time.sleep(0.5)
+    order1 = client.order.get(accountID=ACCOUNT_ID, orderSpecifier=position["order_id_m1"]).body
+    order2 = client.order.get(accountID=ACCOUNT_ID, orderSpecifier=position["order_id_m2"]).body
+    if "order" in order1.keys() and "order" in order2.keys():
+      order_m1 = json.loads(order1["order"].json())
+      order_market_m1 = order_m1["instrument"]
+      order_size_m1 = order_m1["units"]
+      order_side_m1 = "SELL" if float(order_size_m1) < 0 else "BUY"
+      order_size_m1 = str(int(abs(float(order_size_m1))))
+      time.sleep(0.5)
 
-    # Get order info m2 per exchange
-    order_m2 = json.loads(client.order.get(accountID=ACCOUNT_ID, orderSpecifier=position["order_id_m2"]).body["order"].json())
-    order_market_m2 = order_m2["instrument"]
-    order_size_m2 = order_m2["units"]
-    order_side_m2 = "SELL" if float(order_size_m2) < 0 else "BUY"
-    order_size_m2 = str(int(abs(float(order_size_m2))))
+      # Get order info m2 per exchange
+      order_m2 = json.loads(order2["order"].json())
+      order_market_m2 = order_m2["instrument"]
+      order_size_m2 = order_m2["units"]
+      order_side_m2 = "SELL" if float(order_size_m2) < 0 else "BUY"
+      order_size_m2 = str(int(abs(float(order_size_m2))))
 
-    # Perform matching checks: check json file against data from OANDA API
-    check_m1 = position_market_m1 == order_market_m1 and position_size_m1 == order_size_m1 and position_side_m1 == order_side_m1
-    check_m2 = position_market_m2 == order_market_m2 and position_size_m2 == order_size_m2 and position_side_m2 == order_side_m2
-    #check_live = position_market_m1 in markets_live and position_market_m2 in markets_live
+      # Perform matching checks: check json file against data from OANDA API
+      check_m1 = position_market_m1 == order_market_m1 and position_size_m1 == order_size_m1 and position_side_m1 == order_side_m1
+      check_m2 = position_market_m2 == order_market_m2 and position_size_m2 == order_size_m2 and position_side_m2 == order_side_m2
+      #check_live = position_market_m1 in markets_live and position_market_m2 in markets_live
 
-    # Guard: If not all match exit with error
-    if not check_m1 or not check_m2:
-      print(f"Warning: Not all open positions match exchange records for {position_market_m1} and {position_market_m2}")
-      continue
+      # Guard: If not all match exit with error
+      if not check_m1 or not check_m2:
+        send_message("Issue with mismatch data and order")
+        print(f"Warning: Not all open positions match exchange records for {position_market_m1} and {position_market_m2}")
+        continue
     
     # Get prices
     series_1 = get_candles_recent(client, position_market_m1)

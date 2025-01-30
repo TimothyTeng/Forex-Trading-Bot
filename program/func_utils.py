@@ -18,10 +18,10 @@ def format_number(curr_num, match_decimals):
 def format_time(timestamp):
     return timestamp.astimezone(timezone.utc).replace(microsecond=0).isoformat()
 
-def get_ISO_times():
+def get_ISO_times(hours):
     # Get time stamps
     date_start = datetime.now(timezone.utc)  # Ensure datetime is timezone-aware
-    date_end = date_start - timedelta(hours=500)
+    date_end = date_start - timedelta(hours=hours)
     times_dict = {
         "range_1": {
             "from_iso": format_time(date_start),

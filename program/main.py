@@ -64,13 +64,13 @@ def run_trading_logic():
 
       # Place trades for opening positions
       if MANAGE_EXITS_EVENT.is_set():
-        try:
+        #try:
           print("Managing exits...")
           manage_trade_exits(client)
           time.sleep(2)
-        except Exception as e:
-          print("Error managing exiting positions", e)
-          send_message(f"Error managing exiting positions: {e}")
+        #except Exception as e:
+          #print("Error managing exiting positions", e)
+          #send_message(f"Error managing exiting positions: {e}")
           #exit(1)
 
       # Place trades for opening positions

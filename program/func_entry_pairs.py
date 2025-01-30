@@ -4,6 +4,7 @@ from func_public import get_candles_recent
 from func_cointegration import calculate_zscore
 from func_private import is_open_positions
 from func_bot_agent import BotAgent
+from func_messaging import send_message
 import pandas as pd
 import json
 
@@ -132,6 +133,7 @@ def open_positions(client):
                 del(bot_open_dict)
               
                 # Confirm bot status
+                send_message(f"Opened {base_market}, {quote_market}")
                 print("Trade status: Live")
                 print("---")
   # Save agents

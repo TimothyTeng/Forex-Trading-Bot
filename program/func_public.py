@@ -6,7 +6,7 @@ from pprint import pprint
 import time
 import json
 
-ISO_TIMES = get_ISO_times()
+ISO_TIMES = get_ISO_times(500)
 
 
 # Get candles recent

@@ -74,7 +74,7 @@ async def balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 - Account balance: {balance}
 - current unrealized Profit/Loss: {unrealizedPL}
 - current margin used: {margin}
-- current win percentage: {round(float(unrealizedPL)/float(margin), 3)}
+- current win percentage: {round(float(unrealizedPL)/float(margin+0.000000001), 3)}
     """
     )
 
@@ -93,6 +93,7 @@ async def config_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
   current configeration:
   Place trade = {PLACE_TRADES_EVENT.is_set()}
   Update cointegrated pairs = {FIND_COINTEGRATED_EVENT.is_set()}
+  Abort all positions = {ABORT_ALL_POSITIONS_EVENT.is_set()}
   Manage positions = {MANAGE_EXITS_EVENT.is_set()}
   """
 )
