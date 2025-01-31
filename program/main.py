@@ -25,6 +25,7 @@ def run_trading_logic():
     if ABORT_ALL_POSITIONS_EVENT.is_set():
       try:
         print("Aborting all positions...")
+        send_message("Beginning aborting positions")
         close_orders = abort_all_positions(client)
       except Exception as e:
         print("Error aborting all positions:", e)
@@ -112,6 +113,7 @@ def run_trading_logic():
       if ABORT_ALL_POSITIONS_EVENT.is_set():
         try:
           print("Aborting all positions...")
+          send_message("Beginning aborting positions")
           close_orders = abort_all_positions(client)
         except Exception as e:
           print("Error aborting all positions:", e)

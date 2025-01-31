@@ -74,7 +74,7 @@ async def balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 - Account balance: {balance}
 - current unrealized Profit/Loss: {unrealizedPL}
 - current margin used: {margin}
-- current win percentage: {round(float(unrealizedPL)/float(margin+0.000000001), 3)}
+- current win percentage: {round(float(unrealizedPL)/(float(margin)+0.00001), 3)}
     """
     )
 
