@@ -1,5 +1,5 @@
 from func_private import place_market_order, check_order_status
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import time
 from constants import ACCOUNT_ID
 import json
@@ -64,6 +64,7 @@ class BotAgent:
       "order_time_m2": "",
       "pair_status": "",
       "comments": "",
+      "time_bought": "",
     }
 
   # Check order status by id
@@ -99,6 +100,7 @@ class BotAgent:
         return "error"
       
     # Return live
+    
     return "live"
   
   # Open trades
@@ -215,4 +217,5 @@ class BotAgent:
     #Return success result
     else:
       self.order_dict["pair_status"] = "LIVE"
+      self.order_dict["time_bought"] = datetime.now(timezone.utc).isoformat()
       return self.order_dict

@@ -1,9 +1,10 @@
-from constants import CLOSE_AT_ZSCORE_CROSS, ACCOUNT_ID
+from constants import CLOSE_AT_ZSCORE_CROSS, ACCOUNT_ID, FIND_COINTEGRATED_EVENT
 from func_utils import format_number
 from func_public import get_candles_recent
 from func_cointegration import calculate_zscore
-from func_private import place_market_order
+from func_private import place_market_order, abort_all_positions
 from func_messaging import send_message
+from datetime import datetime, timezone
 import pandas as pd
 import json
 import time
@@ -16,8 +17,10 @@ def manage_trade_exits(client):
     Manage exiting open positions
     Based upon criteria set in constants
   """
+
   # Initialize saving output
   save_output = []
+  most_time_elapsed = 0
 
   # Opening JSON file
   try:
@@ -110,15 +113,30 @@ def manage_trade_exits(client):
         spread = series_1 - (hedge_ratio * series_2)
         z_score_current = calculate_zscore(spread).values.tolist()[-1]
 
-
-      z_score_level_check = abs(z_score_current) >= abs(z_score_traded)
       z_score_cross_check = (z_score_current < 0 and z_score_traded > 0) or (z_score_current > 0 and z_score_traded < 0)
+      time_elapsed = (datetime.now(timezone.utc) - datetime.fromisoformat(position["time_bought"])).total_seconds()
+
+      # If time elapsed < 5hrs - normal goal
+      if time_elapsed < 18000:
+        z_score_level_check = abs(z_score_current) >= abs(z_score_traded)
+
+      # If time elapsed 5hrs < x < 13hrs - gradially decrease till 0.5 zscore
+      elif time_elapsed < 46800:
+        z_score_level_check = abs(z_score_current) >= abs((((z_score_traded-0.5) / 28800) * (time_elapsed-18000) + z_score_traded))
+      
+      # If time > 13hrs - stay at 0.5 zscore threshold
+      else:
+        z_score_level_check = abs(z_score_current) >= 0.5
+      
       print(z_score_current, z_score_traded, abs(z_score_current) >= abs(z_score_traded), (z_score_current < 0 and z_score_traded > 0) or (z_score_current > 0 and z_score_traded < 0))
       # Close trade
       if z_score_level_check and z_score_cross_check:
 
         # Initiate close trigger
         is_close = True
+      else:
+        if time_elapsed > most_time_elapsed:
+          most_time_elapsed = time_elapsed
     # Add any other close logic you want here
     # Trigger is_close
 
@@ -190,9 +208,49 @@ def manage_trade_exits(client):
       save_output.append(position)
   
   # Save remaining items
-  print(f"{len(save_output)} Items remaining. Saving file...")
-  with open("bot_agents.json", "w") as f:
-    json.dump(save_output, f)
+
+
+  # Get profit and loss as well as margin spent
+  response = client.account.get(accountID=ACCOUNT_ID)
+  account = json.loads(response.body["account"].json())
+
+  pnl, margin = account["unrealizedPL"], account["marginUsed"]
+
+  # If nothing traded, ignore
+  if float(margin) == 0:
+    print(f"{len(save_output)} Items remaining. Saving file...")
+    with open("bot_agents.json", "w") as f:
+      json.dump(save_output, f)
+
+  # If loss > 3%, close
+  elif (float(pnl)/float(margin)) < -0.03:
+    FIND_COINTEGRATED_EVENT.set()
+    abort_all_positions(client)
+    send_message("Stop loss triggered - Selling all positions")
+  
+  # If < 5hrs and gain > 2%, close
+  elif most_time_elapsed < 18000 and (float(pnl)/float(margin)) > 0.02:
+    FIND_COINTEGRATED_EVENT.set()
+    abort_all_positions(client)
+    send_message(f"earned 0.02 in {most_time_elapsed}s")
+  
+  # If 5hrs > x > 13hrs gain deminishes from 2% to 0%
+  elif most_time_elapsed < 46800 and (float(pnl)/float(margin)) > abs(((0.02 / 28800) * (time_elapsed-18000) + 0.02)):
+    FIND_COINTEGRATED_EVENT.set()
+    abort_all_positions(client)
+    send_message(f"earned {abs(((0.02 / 28800) * (time_elapsed-18000) + 0.02))} in {most_time_elapsed}s")
+  
+  # If > 13hrs, as long as profit, take
+  elif most_time_elapsed >= 46800 and (float(pnl)/float(margin)) > 0:
+    FIND_COINTEGRATED_EVENT.set()
+    abort_all_positions(client)
+    send_message(f"> 13hrs, stop all loss")
+  
+  # Continue as usual
+  else:
+    print(f"{len(save_output)} Items remaining. Saving file...")
+    with open("bot_agents.json", "w") as f:
+      json.dump(save_output, f)
 
 
 

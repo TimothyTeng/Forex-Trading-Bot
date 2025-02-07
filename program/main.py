@@ -65,24 +65,13 @@ def run_trading_logic():
 
       # Place trades for opening positions
       if MANAGE_EXITS_EVENT.is_set():
-        try:
+        #try:
           print("Managing exits...")
           manage_trade_exits(client)
           time.sleep(2)
-        except Exception as e:
-          print("Error managing exiting positions", e)
-          send_message(f"Error managing exiting positions: {e}")
-          #exit(1)
-
-      # Place trades for opening positions
-      if PLACE_TRADES_EVENT.is_set():
-        try:
-          print("Finding trading opportunities...")
-          open_positions(client)
-          time.sleep(2)
-        except Exception as e:
-          print("Error finding trading opportunities", e)
-          send_message(f"Error open trades: {e}")
+        #except Exception as e:
+          #print("Error managing exiting positions", e)
+          #send_message(f"Error managing exiting positions: {e}")
           #exit(1)
 
       #Find Cointegrated pairs
@@ -109,6 +98,17 @@ def run_trading_logic():
           send_message(f"Error saving cointegrated pairs {e}")
           #exit(1)
         FIND_COINTEGRATED_EVENT.clear()
+
+      # Place trades for opening positions
+      if PLACE_TRADES_EVENT.is_set():
+        try:
+          print("Finding trading opportunities...")
+          open_positions(client)
+          time.sleep(2)
+        except Exception as e:
+          print("Error finding trading opportunities", e)
+          send_message(f"Error open trades: {e}")
+          #exit(1)
       
       if ABORT_ALL_POSITIONS_EVENT.is_set():
         try:
