@@ -104,6 +104,12 @@ def manage_trade_exits(client):
     # Protect API
     time.sleep(0.2)
 
+    # Hard close the application at 0.01
+    if (float(pnl)/float(margin)) > 0.01:
+      FIND_COINTEGRATED_EVENT.set()
+      abort_all_positions(client)
+      send_message(f"earned 0.01 in {most_time_elapsed}s")
+
     # Trigger close based on Z-Score
     if CLOSE_AT_ZSCORE_CROSS:
       # Initialize z-scores
@@ -227,18 +233,6 @@ def manage_trade_exits(client):
     FIND_COINTEGRATED_EVENT.set()
     abort_all_positions(client)
     send_message("Stop loss triggered - Selling all positions")
-  
-  # If < 5hrs and gain > 2%, close
-  elif most_time_elapsed < 18000 and (float(pnl)/float(margin)) > 0.02:
-    FIND_COINTEGRATED_EVENT.set()
-    abort_all_positions(client)
-    send_message(f"earned 0.02 in {most_time_elapsed}s")
-  
-  # If 5hrs > x > 13hrs gain deminishes from 2% to 0%
-  elif most_time_elapsed < 46800 and (float(pnl)/float(margin)) > abs(((0.02 / 28800) * (time_elapsed-18000) + 0.02)):
-    FIND_COINTEGRATED_EVENT.set()
-    abort_all_positions(client)
-    send_message(f"earned {abs(((0.02 / 28800) * (time_elapsed-18000) + 0.02))} in {most_time_elapsed}s")
   
   # If > 13hrs, as long as profit, take
   elif most_time_elapsed >= 46800 and (float(pnl)/float(margin)) > 0:

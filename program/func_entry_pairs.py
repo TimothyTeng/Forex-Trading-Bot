@@ -1,4 +1,4 @@
-from constants import ZSCORE_THRESH, USD_PER_TRADE, USD_MIN_COLLATERAL, ACCOUNT_ID
+from constants import ZSCORE_THRESH, USD_PER_TRADE, USD_MIN_COLLATERAL, ACCOUNT_ID, HALF_LIFE_THRESH
 from func_utils import format_number
 from func_public import get_candles_recent
 from func_cointegration import calculate_zscore
@@ -52,7 +52,7 @@ def open_positions(client):
       z_score = calculate_zscore(spread).values.tolist()[-1]
       
       # Establish if potential trade
-      if abs(z_score) >= ZSCORE_THRESH:
+      if abs(z_score) >= ZSCORE_THRESH and half_life < HALF_LIFE_THRESH:
         # Ensure like for like not already open (diversify trading)
         is_base_open = is_open_positions(client, base_market)
         is_quote_open = is_open_positions(client, quote_market)
