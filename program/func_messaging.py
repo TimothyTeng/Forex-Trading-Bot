@@ -112,10 +112,10 @@ def handle_response(text: str):
     FIND_COINTEGRATED_EVENT.set()
     return "Finding new cointegrated pair after this cycle..."
   if 'enable sell' in processed:
-    FIND_COINTEGRATED_EVENT.set()
+    MANAGE_EXITS_EVENT.set()
     return "Finding selling opportunities..."
   if 'disable sell' in processed:
-    FIND_COINTEGRATED_EVENT.clear()
+    MANAGE_EXITS_EVENT.clear()
     return "Stop finding selling opportunities"
 
 @is_authorized_user
