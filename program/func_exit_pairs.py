@@ -44,6 +44,18 @@ def manage_trade_exits(client):
   # Protect API
   time.sleep(0.5)
 
+  # Get profit and loss as well as margin spent
+  response = client.account.get(accountID=ACCOUNT_ID)
+  account = json.loads(response.body["account"].json())
+
+  pnl, margin = account["unrealizedPL"], account["marginUsed"]
+
+  # Hard close the application at 0.01
+  if (float(pnl)/float(margin)) > 0.01:
+    FIND_COINTEGRATED_EVENT.set()
+    abort_all_positions(client)
+    send_message(f"earned 0.01 in {most_time_elapsed}s")
+
     # Check all saved positions match order record
     # Exit trade according to any exit trade rules
   for position in open_position_dict:
@@ -103,12 +115,6 @@ def manage_trade_exits(client):
 
     # Protect API
     time.sleep(0.2)
-
-    # Hard close the application at 0.01
-    if (float(pnl)/float(margin)) > 0.01:
-      FIND_COINTEGRATED_EVENT.set()
-      abort_all_positions(client)
-      send_message(f"earned 0.01 in {most_time_elapsed}s")
 
     # Trigger close based on Z-Score
     if CLOSE_AT_ZSCORE_CROSS:
