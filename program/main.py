@@ -96,6 +96,7 @@ def run_trading_logic():
         except Exception as e:
           print("Error saving cointegrated pairs:", e)
           send_message(f"Error saving cointegrated pairs {e}")
+          
           #exit(1)
         FIND_COINTEGRATED_EVENT.clear()
 

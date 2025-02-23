@@ -5,6 +5,8 @@ from func_cointegration import calculate_zscore
 from func_private import is_open_positions
 from func_bot_agent import BotAgent
 from func_messaging import send_message
+from datetime import datetime, timezone, timedelta
+import pytz
 import pandas as pd
 import json
 
@@ -16,6 +18,20 @@ def open_positions(client):
     Manage finding triggers for trade entry
     Store trades for managing later on the exit function
   """
+
+  et = pytz.timezone('America/New_York')
+  current_time_utc = datetime.now(timezone.utc)
+  current_time_et = current_time_utc.astimezone(et)
+  five_pm_et = current_time_et.replace(hour=17, minute=0, second=0, microsecond=0)
+  if current_time_et > five_pm_et:
+    five_pm_et += timedelta(days=1)
+  time_remaining = max((five_pm_et - current_time_et).total_seconds(), 0)
+  print(time_remaining)
+  if time_remaining < 7200:
+    return
+  elif time_remaining > 81000:
+    return
+
 
   # Load cointegrated pairs
   df = pd.read_csv("cointegrated_pairs.csv")

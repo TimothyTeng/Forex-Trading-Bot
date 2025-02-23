@@ -4,10 +4,11 @@ from func_public import get_candles_recent
 from func_cointegration import calculate_zscore
 from func_private import place_market_order, abort_all_positions
 from func_messaging import send_message
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import pandas as pd
 import json
 import time
+import pytz
 
 from pprint import pprint
 
@@ -20,7 +21,6 @@ def manage_trade_exits(client):
 
   # Initialize saving output
   save_output = []
-  most_time_elapsed = 0
 
   # Opening JSON file
   try:
@@ -51,10 +51,10 @@ def manage_trade_exits(client):
   pnl, margin = account["unrealizedPL"], account["marginUsed"]
 
   # Hard close the application at 0.01
-  if (float(pnl)/float(margin)) > 0.01:
+  if (float(pnl)/float(margin)+0.000001) > 0.01:
     FIND_COINTEGRATED_EVENT.set()
     abort_all_positions(client)
-    send_message(f"earned 0.01 in {most_time_elapsed}s")
+    send_message(f"earned ${pnl}")
 
     # Check all saved positions match order record
     # Exit trade according to any exit trade rules
@@ -110,12 +110,6 @@ def manage_trade_exits(client):
     series_2 = get_candles_recent(client, position_market_m2)
     time.sleep(0.2)
 
-    # Get markets for reference of tick size
-    markets = client.account.instruments(accountID=ACCOUNT_ID).body["instruments"]
-
-    # Protect API
-    time.sleep(0.2)
-
     # Trigger close based on Z-Score
     if CLOSE_AT_ZSCORE_CROSS:
       # Initialize z-scores
@@ -126,19 +120,25 @@ def manage_trade_exits(client):
         z_score_current = calculate_zscore(spread).values.tolist()[-1]
 
       z_score_cross_check = (z_score_current < 0 and z_score_traded > 0) or (z_score_current > 0 and z_score_traded < 0)
-      time_elapsed = (datetime.now(timezone.utc) - datetime.fromisoformat(position["time_bought"])).total_seconds()
+      et = pytz.timezone('America/New_York')
+      current_time_utc = datetime.now(timezone.utc)
+      current_time_et = current_time_utc.astimezone(et)
+      five_pm_et = current_time_et.replace(hour=17, minute=0, second=0, microsecond=0)
+      if current_time_et > five_pm_et:
+        five_pm_et += timedelta(days=1)
+      time_elapsed = (five_pm_et - current_time_et).total_seconds()
 
-      # If time elapsed < 5hrs - normal goal
-      if time_elapsed < 18000:
+      # If time remaining till close time > 12 hrs
+      if time_elapsed > 43200:
         z_score_level_check = abs(z_score_current) >= abs(z_score_traded)
 
-      # If time elapsed 5hrs < x < 13hrs - gradially decrease till 0.5 zscore
-      elif time_elapsed < 46800:
-        z_score_level_check = abs(z_score_current) >= abs((((z_score_traded-0.5) / 28800) * (time_elapsed-18000) + z_score_traded))
+      # If time elapsed 12hrs < x < 23hrs - gradially decrease till 0.3 zscore
+      elif time_elapsed > 3600:
+        z_score_level_check = abs(z_score_current) >= abs((((z_score_traded - 0.3) / 39600) * (time_elapsed - 3600) + 0.3))
       
-      # If time > 13hrs - stay at 0.5 zscore threshold
+      # If time 23hrs < x < 24hrs - stay at 0.5 zscore threshold
       else:
-        z_score_level_check = abs(z_score_current) >= 0.5
+        z_score_level_check = abs(z_score_current) >= 0.3
       
       print(z_score_current, z_score_traded, abs(z_score_current) >= abs(z_score_traded), (z_score_current < 0 and z_score_traded > 0) or (z_score_current > 0 and z_score_traded < 0))
       # Close trade
@@ -146,9 +146,6 @@ def manage_trade_exits(client):
 
         # Initiate close trigger
         is_close = True
-      else:
-        if time_elapsed > most_time_elapsed:
-          most_time_elapsed = time_elapsed
     # Add any other close logic you want here
     # Trigger is_close
 
@@ -227,6 +224,13 @@ def manage_trade_exits(client):
   account = json.loads(response.body["account"].json())
 
   pnl, margin = account["unrealizedPL"], account["marginUsed"]
+  et = pytz.timezone('America/New_York')
+  current_time_utc = datetime.now(timezone.utc)
+  current_time_et = current_time_utc.astimezone(et)
+  five_pm_et = current_time_et.replace(hour=17, minute=0, second=0, microsecond=0)
+  if current_time_et > five_pm_et:
+    five_pm_et += timedelta(days=1)
+  time_elapsed = (five_pm_et - current_time_et).total_seconds()
 
   # If nothing traded, ignore
   if float(margin) == 0:
@@ -235,13 +239,13 @@ def manage_trade_exits(client):
       json.dump(save_output, f)
 
   # If loss > 3%, close
-  elif (float(pnl)/float(margin)) < -0.03:
+  elif (float(pnl)/float(margin)+0.000001) < -0.03:
     FIND_COINTEGRATED_EVENT.set()
     abort_all_positions(client)
     send_message("Stop loss triggered - Selling all positions")
   
   # If > 13hrs, as long as profit, take
-  elif most_time_elapsed >= 46800 and (float(pnl)/float(margin)) > 0:
+  elif time_elapsed < 7200 and (float(pnl)/float(margin)+0.000001) > 0:
     FIND_COINTEGRATED_EVENT.set()
     abort_all_positions(client)
     send_message(f"> 13hrs, stop all loss")
