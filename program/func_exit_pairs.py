@@ -51,7 +51,7 @@ def manage_trade_exits(client):
   pnl, margin = account["unrealizedPL"], account["marginUsed"]
 
   # Hard close the application at 0.01
-  if (float(pnl)/float(margin)+0.000001) > 0.01:
+  if (float(pnl)/float(margin)+0.000001) > 0.02:
     FIND_COINTEGRATED_EVENT.set()
     abort_all_positions(client)
     send_message(f"earned ${pnl}")
@@ -217,44 +217,10 @@ def manage_trade_exits(client):
       save_output.append(position)
   
   # Save remaining items
+  print(f"{len(save_output)} Items remaining. Saving file...")
+  with open("bot_agents.json", "w") as f:
+    json.dump(save_output, f)
 
-
-  # Get profit and loss as well as margin spent
-  response = client.account.get(accountID=ACCOUNT_ID)
-  account = json.loads(response.body["account"].json())
-
-  pnl, margin = account["unrealizedPL"], account["marginUsed"]
-  et = pytz.timezone('America/New_York')
-  current_time_utc = datetime.now(timezone.utc)
-  current_time_et = current_time_utc.astimezone(et)
-  five_pm_et = current_time_et.replace(hour=17, minute=0, second=0, microsecond=0)
-  if current_time_et > five_pm_et:
-    five_pm_et += timedelta(days=1)
-  time_elapsed = (five_pm_et - current_time_et).total_seconds()
-
-  # If nothing traded, ignore
-  if float(margin) == 0:
-    print(f"{len(save_output)} Items remaining. Saving file...")
-    with open("bot_agents.json", "w") as f:
-      json.dump(save_output, f)
-
-  # If loss > 3%, close
-  elif (float(pnl)/float(margin)+0.000001) < -0.03:
-    FIND_COINTEGRATED_EVENT.set()
-    abort_all_positions(client)
-    send_message("Stop loss triggered - Selling all positions")
-  
-  # If > 13hrs, as long as profit, take
-  elif time_elapsed < 7200 and (float(pnl)/float(margin)+0.000001) > 0:
-    FIND_COINTEGRATED_EVENT.set()
-    abort_all_positions(client)
-    send_message(f"> 13hrs, stop all loss")
-  
-  # Continue as usual
-  else:
-    print(f"{len(save_output)} Items remaining. Saving file...")
-    with open("bot_agents.json", "w") as f:
-      json.dump(save_output, f)
 
 
 
