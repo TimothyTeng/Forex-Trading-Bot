@@ -74,7 +74,7 @@ def construct_market_prices(client):
   # Find tradable pairs
   for market in markets.body['instruments']:
     market_info = json.loads(market.json())
-    if market_info["type"] == "CURRENCY":
+    if market_info["type"] == "CURRENCY" or market_info["type"] == "CFD":
       tradable_markets.append(market_info["name"])
 
   # Set initial DataFame

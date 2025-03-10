@@ -35,9 +35,9 @@ RESOLUTION = "H1"
 WINDOW = 21
 
 # Thresholds - Opening
-MAX_HALF_LIFE = 24
-ZSCORE_THRESH = 1.5
-HALF_LIFE_THRESH = 24
+MAX_HALF_LIFE = 30
+ZSCORE_THRESH = 1
+HALF_LIFE_THRESH = 30
 USD_PER_TRADE = 100
 # Amount inside your account - To ensure bots do not go above amount in account
 USD_MIN_COLLATERAL = 2000
