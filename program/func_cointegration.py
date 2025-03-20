@@ -48,7 +48,7 @@ def calculate_cointegration(series_1, series_2):
   hedge_ratio = model.params[0]
   spread = series_1 - (hedge_ratio * series_2)
   half_life = calculate_half_life(spread)
-  t_check = coint_t > critical_value
+  t_check = coint_t < critical_value
   coint_flag = 1 if p_value < 0.05 and t_check else 0
   return coint_flag, hedge_ratio, half_life
 

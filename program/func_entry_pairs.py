@@ -69,17 +69,15 @@ def open_positions(client):
       
       # Establish if potential trade
       if abs(z_score) >= ZSCORE_THRESH and half_life < HALF_LIFE_THRESH:
-        print(base_market, quote_market, z_score)
         # Ensure like for like not already open (diversify trading)
         is_base_open = is_open_positions(client, base_market)
         is_quote_open = is_open_positions(client, quote_market)
 
         # Place trade
         if not is_base_open and not is_quote_open:
-          print("Pass")
           # Determine side
-          base_side = "BUY" if z_score < 0 else "SELL"
-          quote_side = "BUY" if z_score > 0 else "SELL"
+          base_side = "BUY" if z_score > 0 else "SELL"
+          quote_side = "BUY" if z_score < 0 else "SELL"
 
           # Get acceptable price in string format with correct number of decimals
           base_price = series_1[-1]
@@ -112,7 +110,6 @@ def open_positions(client):
           check_base = float(base_quantity) > float(base_min_order_size)
           check_quote = float(quote_quantity) > float(quote_min_order_size)
           
-          print(check_base,check_quote, base_quantity, base_min_order_size, quote_quantity, quote_min_order_size)
           # IF CHECKS PASS PLACE TRADES
           if check_base and check_quote:
             # Check account balance
