@@ -82,9 +82,9 @@ def open_positions(client):
           # Get acceptable price in string format with correct number of decimals
           base_price = series_1[-1]
           quote_price = series_2[-1]
-          accept_base_price = float(base_price) * 1.01 if z_score < 0 else float(base_price) * 0.99
-          accept_quote_price = float(quote_price) * 1.01 if z_score > 0 else float(quote_price) * 0.99
-          failsafe_base_price = float(base_price) * 0.05 if z_score > 0 else float(base_price) * 1.7
+          accept_base_price = float(base_price) * 1.01 if z_score > 0 else float(base_price) * 0.99
+          accept_quote_price = float(quote_price) * 1.01 if z_score < 0 else float(quote_price) * 0.99
+          failsafe_base_price = float(base_price) * 0.05 if z_score < 0 else float(base_price) * 1.7
           base_mar = json.loads(client.account.instruments(accountID=ACCOUNT_ID, instruments=base_market).body['instruments'][0].json())
           quote_mar = json.loads(client.account.instruments(accountID=ACCOUNT_ID, instruments=quote_market).body['instruments'][0].json())
 
