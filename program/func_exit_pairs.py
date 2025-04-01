@@ -134,13 +134,11 @@ def manage_trade_exits(client):
 
       # If time elapsed 12hrs < x < 23hrs - gradially decrease till 0.3 zscore
       elif time_elapsed > 3600:
-        z_score_level_check = abs(z_score_current) >= abs((((z_score_traded - 0.3) / 39600) * (time_elapsed - 3600) + 0.3))
+        z_score_level_check = abs(z_score_current) >= abs((((z_score_traded - 0.6) / 39600) * (time_elapsed - 3600) + 0.6))
       
       # If time 23hrs < x < 24hrs - stay at 0.5 zscore threshold
       else:
-        z_score_level_check = abs(z_score_current) >= 0.3
-      
-      print(z_score_current, z_score_traded, abs(z_score_current) >= abs(z_score_traded), (z_score_current < 0 and z_score_traded > 0) or (z_score_current > 0 and z_score_traded < 0))
+        z_score_level_check = abs(z_score_current) >= 0.6
       # Close trade
       if z_score_level_check and z_score_cross_check:
 
